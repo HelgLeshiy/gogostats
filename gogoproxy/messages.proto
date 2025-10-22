@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+message GuildHeader
+{
+  uint32 id = 1;
+  uint32 lvl = 2;
+  uint32 memberCount = 6;
+  string name = 9;
+  uint32 description = 10;
+}
+
+message GuildPlayerHeader
+{
+  string name = 1;
+  uint32 id = 4;
+  uint32 lvl = 5;
+  uint32 player_class = 6;
+  optional uint32 power = 8;
+  optional uint32 stage = 9;
+}
+
+message GuildPlayer
+{
+  GuildPlayerHeader header = 1;
+  uint32 role = 2;
+  uint32 stage = 3;
+  uint32 power = 4;
+} 
+
+message GuildMemberList
+{
+  uint32 count = 1;
+  uint32 page = 2;
+  uint32 pageSize = 3;
+  repeated GuildPlayer guildPlayers = 4;
+}
+
+message GuildInfo
+{
+  GuildHeader header = 1;
+  GuildMemberList list = 3;
+}
