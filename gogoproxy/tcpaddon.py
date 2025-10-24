@@ -1,21 +1,22 @@
 import json
 import logging
-from typing import Any
 import urllib.request
-
-from hexdump import hexdump
+from typing import Any
 
 from google.protobuf.internal.decoder import _DecodeVarint32
-from messages_pb2 import GuildPlayerHeader
+from hexdump import hexdump
 from mitmproxy import tcp
+
+from messages_pb2 import GuildPlayerHeader
 
 CLASS_MAP = {
     1: "swordbearer",
     2: "wayfarer",
     3: "scholar",
     4: "shadowlash",
-    5: "acolyte"
+    5: "acolyte",
 }
+
 
 def parse_character_info(message: bytes) -> GuildPlayerHeader:
     if message.find(bytes.fromhex("0c0f000000")) == -1:
@@ -43,7 +44,7 @@ def parse_character_info(message: bytes) -> GuildPlayerHeader:
             "cls": CLASS_MAP[player.player_class // 1000],
             "stage": player.stage,
             "power": player.power,
-            "guild": guildName
+            "guild": guildName,
         }
     )
     logging.info(
@@ -55,6 +56,7 @@ def parse_character_info(message: bytes) -> GuildPlayerHeader:
     )
 
     return player
+
 
 def post_json(url, payload, headers=None):
     data = json.dumps(payload).encode()
