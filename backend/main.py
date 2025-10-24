@@ -1,83 +1,58 @@
 import logging
+from typing import Any
 
 from flask import Flask, Response, request
 from prometheus_client import CONTENT_TYPE_LATEST, Gauge, generate_latest
 
-player_power = Gauge("player_power", "Player power", ["player_id"])
-player_lvl = Gauge("player_lvl", "Player level", ["player_id"])
-player_stage = Gauge("player_stage", "Player stage", ["player_id"])
+class PlayerMetrics:
+    def __init__(self) -> None:
+        self._common_labels = ['player_id', 'nickname', 'guild', 'class']
+        
+        self._player_power = Gauge("player_power", "Player power", self._common_labels)
+        self._player_lvl = Gauge("player_lvl", "Player level", self._common_labels)
+        self._player_stage = Gauge("player_stage", "Main story stage", self._common_labels)
+        self._player_dragon_dmg = Gauge("player_dragon_dmg", "Player dragon damage", self._common_labels)
 
-# info metric: holds nickname as label (value is constant 1)
-player_info = Gauge(
-    "player_info",
-    "Player info (label values contain nickname)",
-    ["player_id", "nickname"],
-)
+        self._player_cache: dict[int, dict[str, Any]] = {}
 
-# in-memory map to know previous nickname for a player so we can remove old label combos
-_player_nick_map: dict[str, str] = {}  # { str(player_id): "sanitized_nickname" }
+    def _get_labels(self, player_id: int, nickname: str | None = None, guild: str | None = None, player_class: str | None = None) -> dict[str, Any] | None:
+        """Get or create label dictionary for a player"""
+        key = player_id
+        if key not in self._player_cache:
+            if nickname is None or guild is None or player_class is None:
+                return None
+            
+            self._player_cache[key] = {
+                'player_id': player_id,
+                'nickname': nickname,
+                'guild': guild,
+                'class': player_class
+            }
+        return self._player_cache[key]
+    
+    def update_player_metrics(self, player_id: int, nickname: str, guild: str, player_class: str, 
+                            power: int, level: int, stage: int) -> None:
+        labels = self._get_labels(player_id, nickname, guild, player_class)
+        if labels is None:
+            return
+        
+        self._player_power.labels(**labels).set(power)
+        self._player_lvl.labels(**labels).set(level)
+        self._player_stage.labels(**labels).set(stage)
 
-# player_dragon_dmg = Gauge("magav2_player_dragon_dmg", "Player dragon damage", ["player_id"])
+    def update_player_dragon_dmg(self, player_id: int, dragon_dmg: int) -> None:
+        labels = self._get_labels(player_id)
+        if labels is None:
+            return
+        
+        self._player_dragon_dmg.labels(**labels).set(dragon_dmg)
 
 logger = logging.getLogger("pylogger")
-
 logger.setLevel(logging.DEBUG)
-
 logger.info("starting server...")
-
 app = Flask("gogostats")
 
-
-def sanitize_label_value(s, max_len=100):
-    """Make nickname safe as a label value: trim, replace problematic characters."""
-    if s is None:
-        return ""
-    # convert to str, strip whitespace
-    v = str(s).strip()
-    # replace characters that may complicate queries or rendering
-    for ch in ['"', "'", "\\", "}", "{", "\n", "\r", "\t"]:
-        v = v.replace(ch, "_")
-    # optionally collapse multiple spaces
-    v = " ".join(v.split())
-    # trim
-    if len(v) > max_len:
-        v = v[:max_len]
-    return v
-
-
-def set_player_metrics(
-    player_id: int,
-    nickname: str | None = None,
-    power: int | None = None,
-    lvl: int | None = None,
-    stage: int | None = None,
-    dragon_dmg: int | None = None,
-):
-    pid = str(player_id)
-    if power is not None:
-        player_power.labels(player_id=pid).set(power)
-    if lvl is not None:
-        player_lvl.labels(player_id=pid).set(lvl)
-    if stage is not None:
-        player_stage.labels(player_id=pid).set(stage)
-
-    if nickname is not None:
-        nick_s = sanitize_label_value(nickname)
-        prev = _player_nick_map.get(pid)
-        # if nickname changed, remove old label pair to avoid stale series
-        if prev is not None and prev != nick_s:
-            try:
-                player_info.remove(player_id=pid, nickname=prev)
-            except KeyError:
-                pass
-        # set new pair
-        player_info.labels(player_id=pid, nickname=nick_s).set(1)
-        # record current nickname
-        _player_nick_map[pid] = nick_s
-
-    # if dragon_dmg is not None:
-    # player_dragon_dmg.labels(player_id=pid).set(dragon_dmg)
-
+player_metrics = PlayerMetrics()
 
 @app.route("/metrics")
 def metrics():
@@ -96,11 +71,27 @@ def flask_players_add():
         nickname = player["nickname"]
         id = player["id"]
         lvl = player["lvl"]
-        # cls = player["cls"]
+        cls = player["cls"]
+        guild = player["guild"]
         stage = player["stage"]
         power = player["power"]
 
-        set_player_metrics(id, nickname, power, lvl, stage)
+        player_metrics.update_player_metrics(id, nickname, guild, cls, power, lvl, stage)
+
+    return "", 200
+
+@app.route("/v1/dragon_damage/add", methods=["POST"])
+def flask_dragon_damage_add():
+    logger.info("flask request", extra={"tags": {"url": request.url}})
+    req = request.get_json()
+    print(req)
+
+    players = req["players"]
+
+    for player in players:
+        id = player["id"]
+        dmg = player["dmg"]
+        player_metrics.update_player_dragon_dmg(id, dmg)
 
     return "", 200
 
