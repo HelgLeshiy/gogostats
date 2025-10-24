@@ -17,6 +17,7 @@ message GuildPlayerHeader
   uint32 player_class = 6;
   optional uint32 power = 8;
   optional uint32 stage = 9;
+  string guildName = 13;
 }
 
 message GuildPlayer

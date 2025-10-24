@@ -17,6 +17,7 @@ message GuildPlayerHeader
   uint32 player_class = 6;
   optional uint32 power = 8;
   optional uint32 stage = 9;
+  string guildName = 13;
 }
 
 message GuildPlayer
@@ -39,4 +40,44 @@ message GuildInfo
 {
   GuildHeader header = 1;
   GuildMemberList list = 3;
+}
+
+message GuildHeaderRequest
+{
+  string token = 2;
+  uint32 playerId = 1;
+  string strangeKey = 3;
+}
+
+message GuildListRequest
+{
+  string token = 2;
+  uint32 offset = 5;
+  string strangeKey = 3;
+  uint32 playerId = 1;
+  uint32 count = 6;
+}
+
+message DragonDmgRequest
+{
+  uint32 playerId = 1;
+  string userId = 2;
+  string strangeKey = 3;
+  uint32 var_910007 = 5;
+  uint32 class_idx = 6;
+  uint32 offset = 7;
+  uint32 count = 8;
+}
+
+message DragonPlayer
+{
+  GuildPlayerHeader header = 1;
+  string damage = 3;
+}
+
+message DragonDmgList
+{
+  uint32 offset = 2;
+  uint32 count = 3;
+  repeated DragonPlayer list = 5;
 }

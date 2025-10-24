@@ -1,11 +1,60 @@
 import json
 import logging
+from typing import Any
 import urllib.request
 
+from hexdump import hexdump
+
 from google.protobuf.internal.decoder import _DecodeVarint32
-from messages_pb2 import GuildInfo, GuildMemberList, GuildPlayerHeader
+from messages_pb2 import GuildPlayerHeader
 from mitmproxy import tcp
 
+CLASS_MAP = {
+    1: "swordbearer",
+    2: "wayfarer",
+    3: "scholar",
+    4: "shadowlash",
+    5: "acolyte"
+}
+
+def parse_character_info(message: bytes) -> GuildPlayerHeader:
+    if message.find(bytes.fromhex("0c0f000000")) == -1:
+        raise Exception("Cannot parse character info: command signature not found")
+
+    logging.info("Player header message detected!")
+    player = GuildPlayerHeader()
+    payload_start = (
+        message.find(bytes.fromhex("0c0f000000")) + 11
+    )  # Skip the length prefix
+    payload = message[payload_start:]
+    length, pos = _DecodeVarint32(payload, 0)
+    message_data = payload[pos : pos + length]
+    logging.info(hexdump(message_data))
+    player.ParseFromString(message_data)
+    send_payload: dict[str, Any] = {"players": []}
+    guildName = "no guild"
+    if player.guildName is not None and player.guildName != "":
+        guildName = player.guildName
+    send_payload["players"].append(
+        {
+            "id": player.id,
+            "nickname": player.name,
+            "lvl": player.lvl,
+            "cls": CLASS_MAP[player.player_class // 1000],
+            "stage": player.stage,
+            "power": player.power,
+            "guild": guildName
+        }
+    )
+    logging.info(
+        f"Player Name: {player.name}, Guild: {guildName}, Level: {player.lvl}, Class: {CLASS_MAP[player.player_class // 1000]}, Stage: {player.stage}, Power: {player.power}"
+    )
+    _ = post_json(
+        "http://stream1.transcriptic.ru:5997/v1/players/add",
+        payload=send_payload,
+    )
+
+    return player
 
 def post_json(url, payload, headers=None):
     data = json.dumps(payload).encode()
@@ -13,8 +62,8 @@ def post_json(url, payload, headers=None):
     if headers:
         hdrs.update(headers)
     req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
-    with urllib.request.urlopen(req) as resp:
-        return json.load(resp)
+    with urllib.request.urlopen(req):
+        return
 
 
 class SimpleTCPInterceptor:
@@ -27,90 +76,8 @@ class SimpleTCPInterceptor:
     def tcp_message(self, flow: tcp.TCPFlow):
         if flow.server_conn.address and flow.server_conn.address[1] == 9190:
             message = flow.messages[-1]  # Get the most recent message
-            if message.content.find(bytes.fromhex("1c020000000100000000")) != -1:
-                logging.info("GuildInfo message detected!")
-                guild_info = GuildInfo()
-                payload_start = (
-                    message.content.find(bytes.fromhex("1c020000000100000000")) + 13
-                )  # Skip the length prefix
-                payload = message.content[payload_start:]
-                guild_info.ParseFromString(payload)
-                payload = {"players": []}
-                for member in guild_info.list.guildPlayers:
-                    payload["players"].append(
-                        {
-                            "id": member.header.id,
-                            "nickname": member.header.name,
-                            "lvl": member.header.lvl,
-                            "cls": member.header.player_class,
-                            "stage": member.stage,
-                            "power": member.power,
-                        }
-                    )
-                    logging.info(
-                        f"Player Name: {member.header.name}, Level: {member.header.lvl}, Class: {member.header.player_class}, Stage: {member.stage}, Power: {member.power}"
-                    )
-                _ = post_json(
-                    "http://stream1.transcriptic.ru:5997/v1/players/add",
-                    payload=payload,
-                )
-
-            if message.content.find(bytes.fromhex("1c030000000100000000")) != -1:
-                logging.info("GuildMemberList message detected!")
-                guild_member_list = GuildMemberList()
-                payload_start = (
-                    message.content.find(bytes.fromhex("1c030000000100000000")) + 13
-                )  # Skip the length prefix
-                payload = message.content[payload_start:]
-                guild_member_list.ParseFromString(payload)
-                payload = {"players": []}
-                for member in guild_member_list.guildPlayers:
-                    payload["players"].append(
-                        {
-                            "id": member.header.id,
-                            "nickname": member.header.name,
-                            "lvl": member.header.lvl,
-                            "cls": member.header.player_class,
-                            "stage": member.stage,
-                            "power": member.power,
-                        }
-                    )
-                    logging.info(
-                        f"Player Name: {member.header.name}, Level: {member.header.lvl}, Class: {member.header.player_class}, Stage: {member.stage}, Power: {member.power}"
-                    )
-                _ = post_json(
-                    "http://stream1.transcriptic.ru:5997/v1/players/add",
-                    payload=payload,
-                )
-
-            if message.content.find(bytes.fromhex("0c0f0000000100000000")) != -1:
-                logging.info("Player header message detected!")
-                player = GuildPlayerHeader()
-                payload_start = (
-                    message.content.find(bytes.fromhex("0c0f0000000100000000")) + 11
-                )  # Skip the length prefix
-                payload = message.content[payload_start:]
-                length, pos = _DecodeVarint32(payload, 0)
-                message_data = payload[pos : pos + length]
-                player.ParseFromString(message_data)
-                send_payload = {"players": []}
-                send_payload["players"].append(
-                    {
-                        "id": player.id,
-                        "nickname": player.name,
-                        "lvl": player.lvl,
-                        "cls": player.player_class,
-                        "stage": player.stage,
-                        "power": player.power,
-                    }
-                )
-                logging.info(
-                    f"Player Name: {player.name}, Level: {player.lvl}, Class: {player.player_class}, Stage: {player.stage}, Power: {player.power}"
-                )
-                _ = post_json(
-                    "http://stream1.transcriptic.ru:5997/v1/players/add",
-                    payload=send_payload,
-                )
+            if message.content.find(bytes.fromhex("0c0f000000")) != -1:
+                parse_character_info(message.content)
 
     def tcp_end(self, flow: tcp.TCPFlow):
         """A TCP connection has ended."""

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0emessages.proto\"^\n\x0bGuildHeader\x12\n\n\x02id\x18\x01 \x01(\r\x12\x0b\n\x03lvl\x18\x02 \x01(\r\x12\x13\n\x0bmemberCount\x18\x06 \x01(\r\x12\x0c\n\x04name\x18\t \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\n \x01(\r\"\x8c\x01\n\x11GuildPlayerHeader\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02id\x18\x04 \x01(\r\x12\x0b\n\x03lvl\x18\x05 \x01(\r\x12\x14\n\x0cplayer_class\x18\x06 \x01(\r\x12\x12\n\x05power\x18\x08 \x01(\rH\x00\x88\x01\x01\x12\x12\n\x05stage\x18\t \x01(\rH\x01\x88\x01\x01\x42\x08\n\x06_powerB\x08\n\x06_stage\"]\n\x0bGuildPlayer\x12\"\n\x06header\x18\x01 \x01(\x0b\x32\x12.GuildPlayerHeader\x12\x0c\n\x04role\x18\x02 \x01(\r\x12\r\n\x05stage\x18\x03 \x01(\r\x12\r\n\x05power\x18\x04 \x01(\r\"d\n\x0fGuildMemberList\x12\r\n\x05\x63ount\x18\x01 \x01(\r\x12\x0c\n\x04page\x18\x02 \x01(\r\x12\x10\n\x08pageSize\x18\x03 \x01(\r\x12\"\n\x0cguildPlayers\x18\x04 \x03(\x0b\x32\x0c.GuildPlayer\"I\n\tGuildInfo\x12\x1c\n\x06header\x18\x01 \x01(\x0b\x32\x0c.GuildHeader\x12\x1e\n\x04list\x18\x03 \x01(\x0b\x32\x10.GuildMemberListb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0emessages.proto\"^\n\x0bGuildHeader\x12\n\n\x02id\x18\x01 \x01(\r\x12\x0b\n\x03lvl\x18\x02 \x01(\r\x12\x13\n\x0bmemberCount\x18\x06 \x01(\r\x12\x0c\n\x04name\x18\t \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\n \x01(\r\"\x9f\x01\n\x11GuildPlayerHeader\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02id\x18\x04 \x01(\r\x12\x0b\n\x03lvl\x18\x05 \x01(\r\x12\x14\n\x0cplayer_class\x18\x06 \x01(\r\x12\x12\n\x05power\x18\x08 \x01(\rH\x00\x88\x01\x01\x12\x12\n\x05stage\x18\t \x01(\rH\x01\x88\x01\x01\x12\x11\n\tguildName\x18\r \x01(\tB\x08\n\x06_powerB\x08\n\x06_stage\"]\n\x0bGuildPlayer\x12\"\n\x06header\x18\x01 \x01(\x0b\x32\x12.GuildPlayerHeader\x12\x0c\n\x04role\x18\x02 \x01(\r\x12\r\n\x05stage\x18\x03 \x01(\r\x12\r\n\x05power\x18\x04 \x01(\r\"d\n\x0fGuildMemberList\x12\r\n\x05\x63ount\x18\x01 \x01(\r\x12\x0c\n\x04page\x18\x02 \x01(\r\x12\x10\n\x08pageSize\x18\x03 \x01(\r\x12\"\n\x0cguildPlayers\x18\x04 \x03(\x0b\x32\x0c.GuildPlayer\"I\n\tGuildInfo\x12\x1c\n\x06header\x18\x01 \x01(\x0b\x32\x0c.GuildHeader\x12\x1e\n\x04list\x18\x03 \x01(\x0b\x32\x10.GuildMemberList\"I\n\x12GuildHeaderRequest\x12\r\n\x05token\x18\x02 \x01(\t\x12\x10\n\x08playerId\x18\x01 \x01(\r\x12\x12\n\nstrangeKey\x18\x03 \x01(\t\"f\n\x10GuildListRequest\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0e\n\x06offset\x18\x05 \x01(\r\x12\x12\n\nstrangeKey\x18\x03 \x01(\t\x12\x10\n\x08playerId\x18\x01 \x01(\r\x12\r\n\x05\x63ount\x18\x06 \x01(\r\"\x8e\x01\n\x10\x44ragonDmgRequest\x12\x10\n\x08playerId\x18\x01 \x01(\r\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\x12\n\nstrangeKey\x18\x03 \x01(\t\x12\x12\n\nvar_910007\x18\x05 \x01(\r\x12\x11\n\tclass_idx\x18\x06 \x01(\r\x12\x0e\n\x06offset\x18\x07 \x01(\r\x12\r\n\x05\x63ount\x18\x08 \x01(\r\"B\n\x0c\x44ragonPlayer\x12\"\n\x06header\x18\x01 \x01(\x0b\x32\x12.GuildPlayerHeader\x12\x0e\n\x06\x64\x61mage\x18\x03 \x01(\t\"K\n\rDragonDmgList\x12\x0e\n\x06offset\x18\x02 \x01(\r\x12\r\n\x05\x63ount\x18\x03 \x01(\r\x12\x1b\n\x04list\x18\x05 \x03(\x0b\x32\r.DragonPlayerb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,11 +34,21 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GUILDHEADER']._serialized_start=18
   _globals['_GUILDHEADER']._serialized_end=112
   _globals['_GUILDPLAYERHEADER']._serialized_start=115
-  _globals['_GUILDPLAYERHEADER']._serialized_end=255
-  _globals['_GUILDPLAYER']._serialized_start=257
-  _globals['_GUILDPLAYER']._serialized_end=350
-  _globals['_GUILDMEMBERLIST']._serialized_start=352
-  _globals['_GUILDMEMBERLIST']._serialized_end=452
-  _globals['_GUILDINFO']._serialized_start=454
-  _globals['_GUILDINFO']._serialized_end=527
+  _globals['_GUILDPLAYERHEADER']._serialized_end=274
+  _globals['_GUILDPLAYER']._serialized_start=276
+  _globals['_GUILDPLAYER']._serialized_end=369
+  _globals['_GUILDMEMBERLIST']._serialized_start=371
+  _globals['_GUILDMEMBERLIST']._serialized_end=471
+  _globals['_GUILDINFO']._serialized_start=473
+  _globals['_GUILDINFO']._serialized_end=546
+  _globals['_GUILDHEADERREQUEST']._serialized_start=548
+  _globals['_GUILDHEADERREQUEST']._serialized_end=621
+  _globals['_GUILDLISTREQUEST']._serialized_start=623
+  _globals['_GUILDLISTREQUEST']._serialized_end=725
+  _globals['_DRAGONDMGREQUEST']._serialized_start=728
+  _globals['_DRAGONDMGREQUEST']._serialized_end=870
+  _globals['_DRAGONPLAYER']._serialized_start=872
+  _globals['_DRAGONPLAYER']._serialized_end=938
+  _globals['_DRAGONDMGLIST']._serialized_start=940
+  _globals['_DRAGONDMGLIST']._serialized_end=1015
 # @@protoc_insertion_point(module_scope)
