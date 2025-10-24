@@ -8,7 +8,10 @@ Go Go Muffin game statistics services
    docker compose up -d --build
    ```
 
-## Using
+## Autocollecting
+You can write pm me in telegram [@HelgLeshiy](http://t.me/HelgLeshiy) and pass your User ID (look at user center) and Character ID. And I will run autocollection for your character guild and server dragon dmg
+
+## Using proxy for collecting data
 1. Install any socks5 proxy client on your device with game (for example Tun2Socks for Android)
 2. Enter gogo mitm proxy address and port (main server is stream1.transcriptic.ru 5800). Dont connect.
 3. Open game, authorize and enter server
